@@ -1,5 +1,18 @@
 .App {
-  text-align: center;
+}
+.pointer {
+  cursor: pointer;
+}
+
+.AdminWrapper {
+  display: inline-flex;
+  width: calc(100vw - 200px);
+  height: 100vh;
+  max-height: 100vh;
+  overflow-y: auto;
+  padding-top: 24px;
+  padding-left: 60px;
+  background-color: #f9f9f9;
 }
 
 .App-logo {

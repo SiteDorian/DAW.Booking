@@ -23,7 +23,7 @@
 
 #booking {
 	font-family: 'Montserrat', sans-serif;
-	background-image: url('../img/caminul_1.jpg');
+	background-image: url('../client/src/site/img/caminul_1.jpg');
 	background-size: cover;
 	background-position: center;
 }
