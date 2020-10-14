@@ -2,8 +2,8 @@
 
 ## University project
 
-###Start server
+### Start server
 /api nodemon server.js
 
-###start client app
+### Start client app
 /client npm start
