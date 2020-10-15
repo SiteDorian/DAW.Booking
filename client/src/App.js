@@ -9,6 +9,8 @@ import VerticalMenu from "./admin/components/VerticalMenu";
 import BlocksList from "./admin/components/BlocksList";
 import RoomsList from "./admin/components/RoomsList";
 import Dashboard from "./admin/components/Dashboard";
+import StudentsList from "./admin/components/StudentsList";
+import UsersList from "./admin/components/UsersList";
 
 function App() {
     const [state, setState] = useState({})
@@ -44,6 +46,12 @@ function App() {
                                         />
                                         <Route
                                             path={`${prefix}/rooms`} component={RoomsList}
+                                        />
+                                        <Route
+                                            path={`${prefix}/users`} component={UsersList}
+                                        />
+                                        <Route
+                                            path={`${prefix}/students`} component={StudentsList}
                                         />
                                     </Switch>
                                 </div>

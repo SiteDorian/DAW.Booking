@@ -3,18 +3,16 @@ import "./BlocksList.scss"
 import axios from "axios";
 import {FaEdit, FaTrashAlt, FaEye, FaCheck} from 'react-icons/fa'
 
-function RoomsList() {
+function UsersList() {
     const [items, setItems] = useState([])
-    const [blocks, setBlocks] = useState([])
     const [newItem, setNewItem] = useState({})
 
     useEffect(() => {
         fetchData()
-        fetchBlocksList()
     }, [])
 
     function fetchData() {
-        axios.get(`${process.env.REACT_APP_API_HOST}/rooms`)
+        axios.get(`${process.env.REACT_APP_API_HOST}/users`)
             .then(data => {
                 let resp = data.data || {}
                 if (resp.status)
@@ -23,19 +21,11 @@ function RoomsList() {
             })
     }
 
-    function fetchBlocksList() {
-        axios.get(`${process.env.REACT_APP_API_HOST}/blocks`)
-            .then(data => {
-                let resp = data.data || {}
-                if (resp.status)
-                    setBlocks([...resp.data])
-            })
-    }
 
     function handleUpdate(item = {}) {
         console.log("item to update", item)
         if (item.id)
-            axios.post(`${process.env.REACT_APP_API_HOST}/update-room`, {...item})
+            axios.post(`${process.env.REACT_APP_API_HOST}/update-user`, {...item})
                 .then(data => {
                     let resp = data.data || {}
                     if (resp.status) {
@@ -46,8 +36,8 @@ function RoomsList() {
 
 
     function handleSave() {
-        if (newItem && newItem.nr && newItem.block_id)
-            axios.post(`${process.env.REACT_APP_API_HOST}/create-room`, {...newItem})
+        if (newItem && newItem.name && newItem.email)
+            axios.post(`${process.env.REACT_APP_API_HOST}/create-user`, {...newItem})
                 .then(data => {
                     let resp = data.data || {}
                     if (resp.status) {
@@ -63,20 +53,21 @@ function RoomsList() {
         <div className={"BlocksList container"}>
             <div className={"row"}>
                 <div className={"col-12"}>
-                    <h1>Lista de camere</h1>
+                    <h1>Lista de useri</h1>
                 </div>
                 <div className={"col-12 mt-4"} style={{paddingBottom: '150px'}}>
                     <table className={"table table-bordered"}>
                         <thead>
                         <tr>
                             <th scope="col">ID.</th>
-                            <th scope="col">Nr.</th>
-                            <th scope="col">[A/B]</th>
-                            <th scope="col">Locuri Ocupate</th>
-                            <th scope="col">Capacitate</th>
-                            <th scope="col">Blocul</th>
-                            <th scope="col">Etajul</th>
-                            <th scope="col">Tipul</th>
+                            <th scope="col">Nume</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Tip</th>
+                            <th scope="col">Anul</th>
+                            <th scope="col">Grupa</th>
+                            <th scope="col">Departament</th>
+                            <th scope="col">Necesita cazare</th>
+
                             <th scope="col">Actions</th>
                         </tr>
                         </thead>
@@ -89,55 +80,18 @@ function RoomsList() {
                                         <th scope="row"></th>
                                         <td>
                                             <input
-                                                type="number" min={0} max={9999} value={item.nr || ""}
+                                                type={"text"} value={item.nume || ""}
                                                 onChange={event => {
-                                                    items[key].nr = event.target.value
+                                                    items[key].nume = event.target.value
                                                     setItems([...items])
                                                 }}
                                             />
                                         </td>
                                         <td>
-                                            <select
-                                                value={item.camera || ""}
-                                                onChange={event => {
-                                                    items[key].camera = event.target.value
-                                                    setItems([...items])
-                                                }}
-                                            >
-                                                <option value={''}/>
-                                                <option value={'A'}>A</option>
-                                                <option value={'B'}>B</option>
-                                            </select>
-                                        </td>
-                                        <td>{newItem.edit && 0}</td>
-                                        <td>
                                             <input
-                                                type="number" min={1} max={9} value={item.capacity || ""}
+                                                type={"email"} value={item.email || ""}
                                                 onChange={event => {
-                                                    items[key].capacity = event.target.value
-                                                    setItems([...items])
-                                                }}
-                                            />
-                                        </td>
-                                        <td>
-                                            <select
-                                                value={item.block_id || ""}
-                                                onChange={event => {
-                                                    items[key].block_id = event.target.value
-                                                    setItems([...items])
-                                                }}
-                                            >
-                                                <option value={''} disabled/>
-                                                {blocks && blocks.map && blocks.map((item, key) => (
-                                                    <option value={item.id}>{item.nr}</option>
-                                                ))}
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <input
-                                                type="number" min={0} max={99} value={item.etaj || ""}
-                                                onChange={event => {
-                                                    items[key].etaj = event.target.value
+                                                    items[key].email = event.target.value
                                                     setItems([...items])
                                                 }}
                                             />
@@ -152,6 +106,48 @@ function RoomsList() {
                                             />
                                         </td>
                                         <td>
+                                            <input
+                                                type="number" min={0} max={9} value={item.year || ""}
+                                                onChange={event => {
+                                                    items[key].year = event.target.value
+                                                    setItems([...items])
+                                                }}
+                                            />
+                                        </td>
+
+                                        <td>
+                                            <input
+                                                type={"text"} value={item.grupa || ""}
+                                                onChange={event => {
+                                                    items[key].grupa = event.target.value
+                                                    setItems([...items])
+                                                }}
+                                            />
+                                        </td>
+
+                                        <td>
+                                            <input
+                                                type={"text"} value={item.departament || ""}
+                                                onChange={event => {
+                                                    items[key].departament = event.target.value
+                                                    setItems([...items])
+                                                }}
+                                            />
+                                        </td>
+
+                                        <select
+                                            value={item.necesita_cazare || ""}
+                                            onChange={event => {
+                                                items[key].necesita_cazare = event.target.value
+                                                setItems([...items])
+                                            }}
+                                        >
+                                            <option disabled={true}/>
+                                            <option value={true}>Da</option>
+                                            <option value={false}>Nu</option>
+                                        </select>
+
+                                        <td>
                                             <button
                                                 type="button" className="btn btn-outline-primary"
                                                 onClick={() => handleUpdate({...item})}
@@ -165,13 +161,13 @@ function RoomsList() {
                             return (
                                 <tr key={key}>
                                     <th scope="row">{item.id}</th>
-                                    <td>{item.nr}</td>
-                                    <td>{item.camera || "-"}</td>
-                                    <td>0</td>
-                                    <td>{item.capacity}</td>
-                                    <td>{item.block.nr || ""}</td>
-                                    <td>{item.etaj || ""}</td>
-                                    <td>{item.type || ""}</td>
+                                    <td>{item.name}</td>
+                                    <td>{item.email}</td>
+                                    <td>{item.type}</td>
+                                    <td>{item.year}</td>
+                                    <td>{item.grupa}</td>
+                                    <td>{item.departament}</td>
+                                    <td>{item.necesita_cazare ? "Da" : "Nu" || "-"}</td>
                                     <td>
                                         <button
                                             type="button"
@@ -193,55 +189,17 @@ function RoomsList() {
 
                         <tr>
                             <th scope="row">add</th>
+
                             <td>
                                 {newItem.edit && (
-                                    <input
-                                        type="number" min={0} max={9999} value={newItem.nr || ""}
-                                        onChange={event => setNewItem({...newItem, nr: event.target.value})}
-                                        placeholder={"nr."}
-                                    />
+                                    <input type={"text"} value={newItem.name || ""}
+                                           onChange={event => setNewItem({...newItem, name: event.target.value})}/>
                                 )}
                             </td>
                             <td>
                                 {newItem.edit && (
-                                    <select
-                                        value={newItem.camera || ""}
-                                        onChange={event => {
-                                            setNewItem({...newItem, camera: event.target.value})
-                                        }}
-                                    >
-                                        <option selected={"selected"}>[A/B]</option>
-                                        <option value={'A'}>A</option>
-                                        <option value={'B'}>B</option>
-                                    </select>
-                                )}
-                            </td>
-                            <td>{newItem.edit && 0}</td>
-                            <td>
-                                {newItem.edit && (
-                                    <input type="number" min={1} max={9} value={newItem.capacity || ""}
-                                           onChange={event => setNewItem({...newItem, capacity: event.target.value})}/>
-                                )}
-                            </td>
-                            <td>
-                                {newItem.edit && (
-                                    <select
-                                        value={newItem.block_id || ""}
-                                        onChange={event => {
-                                            setNewItem({...newItem, block_id: event.target.value})
-                                        }}
-                                    >
-                                        <option value={''} disabled/>
-                                        {blocks && blocks.map && blocks.map((item, key) => (
-                                            <option value={item.id}>{item.nr}</option>
-                                        ))}
-                                    </select>
-                                )}
-                            </td>
-                            <td>
-                                {newItem.edit && (
-                                    <input type="number" min={0} max={99} value={newItem.etaj || ""}
-                                           onChange={event => setNewItem({...newItem, etaj: event.target.value})}/>
+                                    <input type={"email"} value={newItem.email || ""}
+                                           onChange={event => setNewItem({...newItem, email: event.target.value})}/>
                                 )}
                             </td>
                             <td>
@@ -250,6 +208,43 @@ function RoomsList() {
                                            onChange={event => setNewItem({...newItem, type: event.target.value})}/>
                                 )}
                             </td>
+
+                            <td>
+                                {newItem.edit && (
+                                    <input
+                                        type="number" min={0} max={9} value={newItem.year || ""}
+                                        onChange={event => setNewItem({...newItem, year: event.target.value})}
+                                        placeholder={"An"}
+                                    />
+                                )}
+                            </td>
+                            <td>
+                                {newItem.edit && (
+                                    <input type={"text"} value={newItem.grupa || ""}
+                                           onChange={event => setNewItem({...newItem, grupa: event.target.value})}/>
+                                )}
+                            </td>
+                            <td>
+                                {newItem.edit && (
+                                    <input type={"text"} value={newItem.departament || ""}
+                                           onChange={event => setNewItem({...newItem, departament: event.target.value})}/>
+                                )}
+                            </td>
+                            <td>
+                                {newItem.edit && (
+                                    <select
+                                        value={newItem.necesita_cazare || ""}
+                                        onChange={event => {
+                                            setNewItem({...newItem, necesita_cazare: event.target.value})
+                                        }}
+                                    >
+                                        <option disabled> </option>
+                                        <option value={true}>Da</option>
+                                        <option value={false}>Nu</option>
+                                    </select>
+                                )}
+                            </td>
+
                             <td>
                                 {!newItem.edit && (
                                     <button
@@ -279,4 +274,4 @@ function RoomsList() {
     )
 }
 
-export default RoomsList
+export default UsersList

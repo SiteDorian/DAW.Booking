@@ -3,7 +3,7 @@ import "./BlocksList.scss"
 import axios from "axios";
 import {FaEdit, FaTrashAlt, FaEye, FaCheck} from 'react-icons/fa'
 
-function RoomsList() {
+function StudentsList() {
     const [items, setItems] = useState([])
     const [blocks, setBlocks] = useState([])
     const [newItem, setNewItem] = useState({})
@@ -63,7 +63,7 @@ function RoomsList() {
         <div className={"BlocksList container"}>
             <div className={"row"}>
                 <div className={"col-12"}>
-                    <h1>Lista de camere</h1>
+                    <h1>Lista de studenti</h1>
                 </div>
                 <div className={"col-12 mt-4"} style={{paddingBottom: '150px'}}>
                     <table className={"table table-bordered"}>
@@ -279,4 +279,4 @@ function RoomsList() {
     )
 }
 
-export default RoomsList
+export default StudentsList
