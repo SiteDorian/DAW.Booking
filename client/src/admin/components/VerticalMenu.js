@@ -33,7 +33,10 @@ function VerticalMenu(props) {
                     <Link className="nav-link" to="/admin/users">Users</Link>
                 </li>
                 <li className="nav-item">
-                    <Link className="nav-link disabled" to="#">Studenti</Link>
+                    <Link className="nav-link" to="/admin/students">Studenti</Link>
+                </li>
+                <li className="nav-item">
+                    <Link className="nav-link disabled" to="#">Data Load</Link>
                 </li>
             </ul>
         </div>

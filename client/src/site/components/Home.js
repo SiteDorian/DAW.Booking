@@ -3,7 +3,7 @@ import "./Home.css"
 import { useHistory } from 'react-router-dom';
 
 function Home() {
-    const [state, setState] = useState({block: 1, guests: 1})
+    const [state, setState] = useState({block: 1, guests: 1, email: localStorage.getItem("email") || ""})
     const history = useHistory();
 
     function onChange(e) {
@@ -52,6 +52,7 @@ function Home() {
                                                 name={"email"}
                                                 value={state.email || ""}
                                                 onChange={onChange}
+                                                required
                                             />
                                         </div>
                                         <div className="form-group">

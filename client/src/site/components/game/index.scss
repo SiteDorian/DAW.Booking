@@ -1,0 +1,18 @@
+.GameContainer {
+  margin-top: 80px;
+
+  #defaultCanvas0 {
+    -webkit-box-shadow: 12px 8px 20px 0px rgba(50, 50, 50, 0.7);
+    -moz-box-shadow:    12px 8px 20px 0px rgba(50, 50, 50, 0.7);
+    box-shadow:         12px 8px 20px 0px rgba(50, 50, 50, 0.7);
+  }
+}
+
+.PreviewContainer {
+  -webkit-box-shadow: 12px 8px 20px 0px rgba(50, 50, 50, 0.7);
+  -moz-box-shadow:    12px 8px 20px 0px rgba(50, 50, 50, 0.7);
+  box-shadow:         12px 8px 20px 0px rgba(50, 50, 50, 0.7);
+  background-color: #08501d;
+  width: 600px;
+  height: 700px;
+}

@@ -11,9 +11,14 @@ import RoomsList from "./admin/components/RoomsList";
 import Dashboard from "./admin/components/Dashboard";
 import StudentsList from "./admin/components/StudentsList";
 import UsersList from "./admin/components/UsersList";
+import RequestsList from "./admin/components/RequestsList";
+import RezervariList from "./admin/components/RezervariList";
+import Game from "./site/components/game";
+import Account from "./site/components/Account";
 
 function App() {
     const [state, setState] = useState({})
+    const [email, setEmail] = useState("")
 
     useEffect(() => {
         callAPI()
@@ -36,6 +41,7 @@ function App() {
                         return (
                             <div style={{display: 'flex'}}>
                                 <VerticalMenu/>
+
                                 <div className={"AdminWrapper"}>
                                     <Switch>
                                         <Route
@@ -46,6 +52,12 @@ function App() {
                                         />
                                         <Route
                                             path={`${prefix}/rooms`} component={RoomsList}
+                                        />
+                                        <Route
+                                            path={`${prefix}/requests`} component={RequestsList}
+                                        />
+                                        <Route
+                                            path={`${prefix}/bookings`} component={RezervariList}
                                         />
                                         <Route
                                             path={`${prefix}/users`} component={UsersList}
@@ -65,13 +77,23 @@ function App() {
                     render={() => {
                         return (
                             <>
-                                <Header/>
+                                <Header email={email}/>
+
                                 <main style={{
                                     // marginTop: '50px'
                                 }}>
                                     <Switch>
                                         <Route path={'/'} exact component={Home}/>
-                                        <Route path={'/search'} component={Search}/>
+                                        <Route
+                                            path={'/search'}
+                                            render={(props) => <Search {...props} email={email} setEmail={setEmail} />}
+                                        />
+                                        <Route path={'/game'} component={Game}/>
+
+                                        <Route
+                                            path={'/account'}
+                                            render={(props) => <Account {...props} email={email} />}
+                                        />
                                     </Switch>
                                 </main>
                             </>

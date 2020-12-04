@@ -1,5 +1,7 @@
 var knex = require("../config/knex");
 var RoomBs = require("../models/RoomModel")
+var UserBs = require("../models/UserModel")
+var BookingBs = require("../models/BookingModel")
 
 class HomeController {
     constructor(router) {
@@ -8,6 +10,10 @@ class HomeController {
     }
 
     registerRouter() {
+        this.router.get("/account", (req, resp, next) =>
+            this.getAccount(req, resp, next)
+        );
+
         this.router.get("/blocks", (req, resp, next) =>
             this.getAllBlocks(req, resp, next)
         );
@@ -29,9 +35,46 @@ class HomeController {
         this.router.post("/create-user", (req, resp, next) =>
             this.createUser(req, resp, next)
         );
-        this.router.post("/update-room", (req, resp, next) =>
+        this.router.post("/update-user", (req, resp, next) =>
             this.updateUser(req, resp, next)
         );
+
+        this.router.get("/bookings", (req, resp, next) =>
+            this.getBookings(req, resp, next)
+        );
+        this.router.post("/create-booking", (req, resp, next) =>
+            this.createBooking(req, resp, next)
+        );
+        this.router.post("/update-booking", (req, resp, next) =>
+            this.updateBooking(req, resp, next)
+        );
+
+        this.router.get("/requests", (req, resp, next) =>
+            this.getRequests(req, resp, next)
+        );
+        this.router.post("/create-request", (req, resp, next) =>
+            this.createRequest(req, resp, next)
+        );
+        this.router.post("/update-request", (req, resp, next) =>
+            this.updateRequest(req, resp, next)
+        );
+    }
+
+    async getAccount(req, resp, next) {
+        let request = req.query || {}
+
+        let user = await UserBs.where("email", request.email)
+            .fetch({
+                withRelated: [
+                    "bookings.room",
+                    "requests"
+                ]
+            })
+
+        return resp.json({
+            status: true,
+            item: user
+        })
     }
 
     async getAllBlocks(req, resp, next) {
@@ -54,8 +97,12 @@ class HomeController {
                     q.where("block_id", request.block)
                 }
                 if (request.etaj) {
-                    q.where("block_id", request.etaj)
+                    q.where("etaj", request.etaj)
                 }
+                if (request.guests) {
+                    q.where("capacity", ">=", request.guests)
+                }
+
             })
             .fetchAll({
                 withRelated: [
@@ -187,6 +234,125 @@ class HomeController {
         }
 
         knex("users")
+            .where("id", request.id)
+            .update({
+                ...data
+            })
+            .then(r => {
+                return resp.json({
+                    status: true,
+                })
+            })
+    }
+
+    async getBookings(req, resp, next) {
+        let request = req.query || {}
+
+        BookingBs.fetchAll({
+            withRelated: [
+                "user",
+                "room"
+            ]
+        })
+            .then(r => {
+                let data = r ? r.serialize() : []
+                return resp.json({
+                    status: true,
+                    data: data
+                })
+            })
+
+        // knex("bookings").select("*")
+        //     .then(data => {
+        //         return resp.json({
+        //             status: true,
+        //             data: data
+        //         })
+        //     })
+    }
+
+    async createBooking(req, resp, next) {
+        let request = req.body
+
+        let data = {
+            start_date: request.start_date || "",
+            end_date: request.end_date || "",
+            room_id: request.room_id || "",
+            user_id: request.user_id || "",
+        }
+
+        knex("bookings")
+            .insert(data)
+            .then(r => {
+                return resp.json({
+                    status: true,
+                })
+            })
+    }
+
+    async updateBooking(req, resp, next) {
+        let request = req.body
+
+        let data = {
+            start_date: request.start_date || "",
+            end_date: request.end_date || "",
+            room_id: request.room_id || "",
+            user_id: request.user_id || "",
+        }
+
+        knex("bookings")
+            .where("id", request.id)
+            .update({
+                ...data
+            })
+            .then(r => {
+                return resp.json({
+                    status: true,
+                })
+            })
+    }
+
+    async getRequests(req, resp, next) {
+        let request = req.query || {}
+
+        knex("requests").select("*")
+            .then(data => {
+                return resp.json({
+                    status: true,
+                    data: data
+                })
+            })
+    }
+
+    async createRequest(req, resp, next) {
+        let request = req.body
+
+        let data = {
+            room_from_id: request.room_from_id || "",
+            room_to_id: request.room_to_id || "",
+            user_id: request.user_id || "",
+        }
+
+        knex("bookings")
+            .insert(data)
+            .then(r => {
+                return resp.json({
+                    status: true,
+                })
+            })
+    }
+
+    async updateRequest(req, resp, next) {
+        let request = req.body
+
+        let data = {
+            user_id: request.user_id || "",
+            status: request.status || "",
+            user_to_id: request.user_to_id || "",
+            user_from_id: request.user_from_id || "",
+        }
+
+        knex("requests")
             .where("id", request.id)
             .update({
                 ...data
