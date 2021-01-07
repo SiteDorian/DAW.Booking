@@ -99,6 +99,7 @@ function UsersList() {
                                         <td>
                                             <input
                                                 type={"text"} value={item.type || ""}
+                                                size={10}
                                                 onChange={event => {
                                                     items[key].type = event.target.value
                                                     setItems([...items])
@@ -118,6 +119,7 @@ function UsersList() {
                                         <td>
                                             <input
                                                 type={"text"} value={item.grupa || ""}
+                                                size={6}
                                                 onChange={event => {
                                                     items[key].grupa = event.target.value
                                                     setItems([...items])
@@ -128,6 +130,7 @@ function UsersList() {
                                         <td>
                                             <input
                                                 type={"text"} value={item.departament || ""}
+                                                size={10}
                                                 onChange={event => {
                                                     items[key].departament = event.target.value
                                                     setItems([...items])

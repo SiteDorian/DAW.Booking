@@ -15,6 +15,8 @@ import RequestsList from "./admin/components/RequestsList";
 import RezervariList from "./admin/components/RezervariList";
 import Game from "./site/components/game";
 import Account from "./site/components/Account";
+import AdminContainer from "./admin/components/AdminContainer";
+import Login from "./admin/components/login";
 
 function App() {
     const [state, setState] = useState({})
@@ -36,40 +38,11 @@ function App() {
             <Switch>
                 <Route
                     path={"/admin"}
-                    render={() => {
-                        let prefix = "/admin"
-                        return (
-                            <div style={{display: 'flex'}}>
-                                <VerticalMenu/>
-
-                                <div className={"AdminWrapper"}>
-                                    <Switch>
-                                        <Route
-                                            path={`${prefix}`} exact={true} component={Dashboard}
-                                        />
-                                        <Route
-                                            path={`${prefix}/blocks`} component={BlocksList}
-                                        />
-                                        <Route
-                                            path={`${prefix}/rooms`} component={RoomsList}
-                                        />
-                                        <Route
-                                            path={`${prefix}/requests`} component={RequestsList}
-                                        />
-                                        <Route
-                                            path={`${prefix}/bookings`} component={RezervariList}
-                                        />
-                                        <Route
-                                            path={`${prefix}/users`} component={UsersList}
-                                        />
-                                        <Route
-                                            path={`${prefix}/students`} component={StudentsList}
-                                        />
-                                    </Switch>
-                                </div>
-                            </div>
-                        )
-                    }}
+                    component={AdminContainer}
+                />
+                <Route
+                    path={"/login"}
+                    component={Login}
                 />
 
                 <Route

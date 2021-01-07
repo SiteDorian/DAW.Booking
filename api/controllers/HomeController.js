@@ -2,6 +2,28 @@ var knex = require("../config/knex");
 var RoomBs = require("../models/RoomModel")
 var UserBs = require("../models/UserModel")
 var BookingBs = require("../models/BookingModel")
+const jwt = require('jsonwebtoken');
+
+const accessTokenSecret = 'youraccesstokensecret';
+
+const authenticateJWT = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+
+    if (authHeader) {
+        const token = authHeader.split(' ')[1];
+
+        jwt.verify(token, accessTokenSecret, (err, user) => {
+            if (err) {
+                return res.sendStatus(403);
+            }
+
+            req.user = user;
+            next();
+        });
+    } else {
+        res.sendStatus(401);
+    }
+};
 
 class HomeController {
     constructor(router) {
@@ -20,42 +42,42 @@ class HomeController {
         this.router.get("/rooms", (req, resp, next) =>
             this.getRooms(req, resp, next)
         );
-        this.router.post("/create-room", (req, resp, next) =>
+        this.router.post("/create-room", authenticateJWT, (req, resp, next) =>
             this.createRoom(req, resp, next)
         );
-        this.router.post("/update-room", (req, resp, next) =>
+        this.router.post("/update-room", authenticateJWT, (req, resp, next) =>
             this.updateRoom(req, resp, next)
         );
-        this.router.post("/delete-room", (req, resp, next) =>
+        this.router.post("/delete-room", authenticateJWT, (req, resp, next) =>
             this.deleteRoom(req, resp, next)
         );
-        this.router.get("/users", (req, resp, next) =>
+        this.router.get("/users", authenticateJWT, (req, resp, next) =>
             this.getUsers(req, resp, next)
         );
-        this.router.post("/create-user", (req, resp, next) =>
+        this.router.post("/create-user", authenticateJWT, (req, resp, next) =>
             this.createUser(req, resp, next)
         );
-        this.router.post("/update-user", (req, resp, next) =>
+        this.router.post("/update-user", authenticateJWT, (req, resp, next) =>
             this.updateUser(req, resp, next)
         );
 
         this.router.get("/bookings", (req, resp, next) =>
             this.getBookings(req, resp, next)
         );
-        this.router.post("/create-booking", (req, resp, next) =>
+        this.router.post("/create-booking", authenticateJWT, (req, resp, next) =>
             this.createBooking(req, resp, next)
         );
-        this.router.post("/update-booking", (req, resp, next) =>
+        this.router.post("/update-booking", authenticateJWT, (req, resp, next) =>
             this.updateBooking(req, resp, next)
         );
 
         this.router.get("/requests", (req, resp, next) =>
             this.getRequests(req, resp, next)
         );
-        this.router.post("/create-request", (req, resp, next) =>
+        this.router.post("/create-request", authenticateJWT, (req, resp, next) =>
             this.createRequest(req, resp, next)
         );
-        this.router.post("/update-request", (req, resp, next) =>
+        this.router.post("/update-request", authenticateJWT, (req, resp, next) =>
             this.updateRequest(req, resp, next)
         );
     }
