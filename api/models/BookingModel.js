@@ -1,7 +1,7 @@
 var bs = require("../config/bs");
-var BlockBs = require("../models/BlockModel")
-var UserBs = require("../models/UserModel")
-var RoomBs = require("../models/RoomModel")
+// var BlockBs = require("../models/BlockModel")
+// var UserBs = require("../models/UserModel")
+// var RoomBs = require("../models/RoomModel")
 
 var BookingBs = bs.model('bookings', {
     tableName: 'bookings',

@@ -13,7 +13,6 @@ import StudentsList from "./admin/components/StudentsList";
 import UsersList from "./admin/components/UsersList";
 import RequestsList from "./admin/components/RequestsList";
 import RezervariList from "./admin/components/RezervariList";
-import Game from "./site/components/game";
 import Account from "./site/components/Account";
 import AdminContainer from "./admin/components/AdminContainer";
 import Login from "./admin/components/login";
@@ -61,7 +60,6 @@ function App() {
                                             path={'/search'}
                                             render={(props) => <Search {...props} email={email} setEmail={setEmail} />}
                                         />
-                                        <Route path={'/game'} component={Game}/>
 
                                         <Route
                                             path={'/account'}

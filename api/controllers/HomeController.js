@@ -64,7 +64,7 @@ class HomeController {
         this.router.get("/bookings", (req, resp, next) =>
             this.getBookings(req, resp, next)
         );
-        this.router.post("/create-booking", authenticateJWT, (req, resp, next) =>
+        this.router.post("/create-booking", (req, resp, next) =>
             this.createBooking(req, resp, next)
         );
         this.router.post("/update-booking", authenticateJWT, (req, resp, next) =>
@@ -128,7 +128,8 @@ class HomeController {
             })
             .fetchAll({
                 withRelated: [
-                    "block"
+                    "block",
+                    "bookings"
                 ]
             })
             .then(r => {
@@ -138,6 +139,7 @@ class HomeController {
                     data: data
                 })
             })
+            .catch(e => console.log('GetRooms error', e))
 
         // knex("rooms").select("*")
         //     .then(data => {

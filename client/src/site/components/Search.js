@@ -120,6 +120,8 @@ function Search(props) {
                                             start_date: state.start_date,
                                             end_date: state.end_date,
                                         })}
+                                        startDate={state.start_date}
+                                        endDate={state.end_date}
                                     />
                                 )
                             })}
@@ -131,31 +133,14 @@ function Search(props) {
             </div>
 
             {selectedRoom && (
-                <Modal isOpen={modal} toggle={toggle}>
-                    <ModalHeader toggle={toggle}>
-                        Room Nr. {selectedRoom && selectedRoom.nr || 'undefined'} {selectedRoom && selectedRoom.camera || ""} details
-                    </ModalHeader>
-                    <ModalBody>
-                        <p className="card-text mb-0">Etaj: {selectedRoom.etaj}</p>
-                        <p className="card-text">Blocul: {selectedRoom.block_id}</p>
-                        <p className="card-text mb-0">Locuri ocupate:</p>
-                        <p className="card-text">0 din {selectedRoom.capacity || "0"}</p>
-                        <p className="card-text">Type: {selectedRoom.type || ""}</p>
-
-                    </ModalBody>
-                    <ModalFooter>
-                        <Button color="primary" onClick={() => {
-                            toggle()
-                            handleBookNow({
-                                user_id: selectedRoom.id,
-                                room_id: selectedRoom.id,
-                                start_date: state.start_date,
-                                end_date: state.end_date,
-                            })
-                        }}>Book Now</Button>{' '}
-                        <Button color="secondary" onClick={toggle}>Cancel</Button>
-                    </ModalFooter>
-                </Modal>
+                <DetailsModal
+                    toggle={toggle}
+                    handleBookNow={handleBookNow}
+                    selectedRoom={selectedRoom}
+                    modal={modal}
+                    startDate={state.start_date}
+                    endDate={state.end_date}
+                />
             )}
 
 
@@ -163,10 +148,94 @@ function Search(props) {
     )
 }
 
+function DetailsModal({toggle, handleBookNow, modal, selectedRoom, startDate, endDate}) {
+
+    let reservation_count = 0
+    if (selectedRoom.bookings && selectedRoom.bookings.length > 0) {
+        selectedRoom.bookings.forEach(element => {
+            if (
+                new Date(element.end_date) < new Date(startDate) ||
+                new Date(element.end_date) > new Date(endDate)
+            ) {
+            } else {
+                reservation_count = reservation_count + 1
+            }
+        })
+
+    }
+
+    return (
+        <Modal isOpen={modal} toggle={toggle}>
+            <ModalHeader toggle={toggle}>
+                Room Nr. {selectedRoom && selectedRoom.nr || 'undefined'} {selectedRoom && selectedRoom.camera || ""} details
+            </ModalHeader>
+            <ModalBody>
+                <p className="card-text mb-0">Etaj: {selectedRoom.etaj}</p>
+                <p className="card-text">Blocul: {selectedRoom.block_id}</p>
+                <p className="card-text mb-0">Locuri ocupate:</p>
+                <p className="card-text">{reservation_count} din {selectedRoom.capacity || "0"}</p>
+                <p className="card-text">Type: {selectedRoom.type || ""}</p>
+
+            </ModalBody>
+            <ModalFooter>
+                <Button color={selectedRoom.type !== 'rezervat' && selectedRoom.capacity > reservation_count ? "primary": 'danger'} onClick={() => {
+                    if (selectedRoom.type !== 'rezervat' && selectedRoom.capacity > reservation_count) {
+                        toggle({room: null})
+                        handleBookNow({
+                            user_id: selectedRoom.id,
+                            room_id: selectedRoom.id,
+                            start_date: startDate,
+                            end_date: endDate,
+                        })
+                    }
+                }}>Book Now</Button>{' '}
+                <Button color="secondary" onClick={toggle}>Cancel</Button>
+            </ModalFooter>
+        </Modal>
+    )
+}
+
 function RoomCard({
                       room = {}, toggle = () => {
-    }, handleBookNow = () => {}
+    }, handleBookNow = () => {},
+    startDate, endDate
                   }) {
+
+    let reservation_count = 0
+    if (room.bookings && room.bookings.length > 0)  {
+        room.bookings.forEach(element => {
+            if (
+                new Date(element.end_date) < new Date(startDate) ||
+                new Date(element.end_date) > new Date(endDate)
+            ) {
+            } else {
+                console.log('count +1', {
+                    'element.start_date': element.start_date,
+                    'element.end_date': element.end_date,
+                    'startDate': startDate,
+                    'endDate': endDate
+
+                })
+                reservation_count = reservation_count + 1
+            }
+        })
+        // room.bookings.reduce((acumulator, currentVal) => {
+        //     if (
+        //         new Date(currentVal.end_date) < new Date(startDate) ||
+        //         new Date(currentVal.start_date) > new Date(endDate)
+        //     ) {
+        //         return acumulator
+        //     } else {
+        //         reservation_count = reservation_count + 1
+        //     }
+        //
+        //     return acumulator
+        // })
+    }
+
+
+
+    console.log('reservation_count', room.nr, reservation_count)
 
     return (
         <div className="card d-inline-flex ml-2 mr-5 mb-5" style={{
@@ -180,7 +249,7 @@ function RoomCard({
                 <h5 className="card-title">Room nr. {room.nr || 'undefined'} {room.camera || ""}</h5>
                 <p className="card-text mb-0">Etaj: {room.etaj}</p>
                 <p className="card-text">Blocul: {room.block_id}</p>
-                <p className="card-text">0 din {room.capacity || "0"}</p>
+                <p className="card-text">{reservation_count} din {room.capacity || "0"}</p>
                 {room.type && (
                     <p className="card-text">Type: {room.type}</p>
                 )}
@@ -193,8 +262,12 @@ function RoomCard({
                     View details
                 </button>
                 <button
-                    className="btn btn-outline-primary"
-                    onClick={handleBookNow}
+                    className={`btn btn-outline-primary ${(room.type == 'rezervat' || room.capacity <= reservation_count) && 'btn-outline-danger'}`}
+                    onClick={() => {
+                        if (room.type !== 'rezervat' && room.capacity > reservation_count) {
+                            handleBookNow()
+                        }
+                    }}
                 >
                     Book Now
                 </button>

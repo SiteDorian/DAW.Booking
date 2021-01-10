@@ -6,7 +6,14 @@ var RoomBs = bs.model('rooms', {
 
     block: function  () {
         return this.hasOne(BlockBs, "id", "block_id")
+    },
+
+    bookings: function  () {
+        return this.hasMany('bookings', "room_id", "id")
     }
+
+
+
 });
 
 module.exports = RoomBs;

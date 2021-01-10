@@ -10,6 +10,12 @@ function Home() {
         setState({ ...state, [e.target.name]: e.target.value } )
     }
 
+    function isNumber(evt) {
+        if (Number(evt.target.value) || evt.target.value.length == 0) {
+            setState({ ...state, [evt.target.name]: evt.target.value });
+        }
+    }
+
     function handleSubmit(event) {
         event.preventDefault();
 
@@ -60,13 +66,13 @@ function Home() {
                                             <span className="form-label">Last 4 digits IDNP</span>
                                             <input
                                                 className="form-control"
-                                                type="number"
-                                                min={1000}
-                                                max={9999}
+                                                type="text"
+                                                maxLength="4"
+                                                minLength="4"
                                                 placeholder="****"
-                                                name={"idnp"}
-                                                value={state.idnp || ""}
-                                                onChange={onChange}
+                                                name={'idnp'}
+                                                value={state.idnp || ''}
+                                                onChange={isNumber}
                                                 required
                                             />
                                         </div>
