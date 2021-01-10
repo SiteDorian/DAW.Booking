@@ -144,7 +144,15 @@ function Search(props) {
 
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="primary" onClick={toggle}>Book Now</Button>{' '}
+                        <Button color="primary" onClick={() => {
+                            toggle()
+                            handleBookNow({
+                                user_id: selectedRoom.id,
+                                room_id: selectedRoom.id,
+                                start_date: state.start_date,
+                                end_date: state.end_date,
+                            })
+                        }}>Book Now</Button>{' '}
                         <Button color="secondary" onClick={toggle}>Cancel</Button>
                     </ModalFooter>
                 </Modal>

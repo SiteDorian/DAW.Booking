@@ -55,6 +55,22 @@ function Home() {
                                                 required
                                             />
                                         </div>
+
+                                        <div className="form-group">
+                                            <span className="form-label">Last 4 digits IDNP</span>
+                                            <input
+                                                className="form-control"
+                                                type="number"
+                                                min={1000}
+                                                max={9999}
+                                                placeholder="****"
+                                                name={"idnp"}
+                                                value={state.idnp || ""}
+                                                onChange={onChange}
+                                                required
+                                            />
+                                        </div>
+
                                         <div className="form-group">
                                             <span className="form-label">Select your block</span>
                                             <select
@@ -99,23 +115,23 @@ function Home() {
                                                     />
                                                 </div>
                                             </div>
-                                            <div className="col-sm-12">
-                                                <div className="form-group">
-                                                    <span className="form-label">Guests</span>
-                                                    <select
-                                                        className="form-control"
-                                                        name={"guests"}
-                                                        value={state.guests || 1}
-                                                        onChange={onChange}
-                                                    >
-                                                        <option value={1}>1</option>
-                                                        <option value={2}>2</option>
-                                                        <option value={3}>3</option>
-                                                        <option value={4}>4</option>
-                                                    </select>
-                                                    <span className="select-arrow"></span>
-                                                </div>
-                                            </div>
+                                            {/*<div className="col-sm-12">*/}
+                                            {/*    <div className="form-group">*/}
+                                            {/*        <span className="form-label">Guests</span>*/}
+                                            {/*        <select*/}
+                                            {/*            className="form-control"*/}
+                                            {/*            name={"guests"}*/}
+                                            {/*            value={state.guests || 1}*/}
+                                            {/*            onChange={onChange}*/}
+                                            {/*        >*/}
+                                            {/*            <option value={1}>1</option>*/}
+                                            {/*            <option value={2}>2</option>*/}
+                                            {/*            <option value={3}>3</option>*/}
+                                            {/*            <option value={4}>4</option>*/}
+                                            {/*        </select>*/}
+                                            {/*        <span className="select-arrow"></span>*/}
+                                            {/*    </div>*/}
+                                            {/*</div>*/}
                                         </div>
                                         <div className="form-btn">
                                             <button
