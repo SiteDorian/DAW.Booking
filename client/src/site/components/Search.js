@@ -106,6 +106,16 @@ function Search(props) {
                             </h5>
                         </div>
 
+                        <div className={"col-12"}>
+                            <p className={"mb-0"}>
+                                Start date: <b>{state.start_date || ""}</b>
+                            </p>
+                            <p>
+                                End date: <b>{state.end_date || ""}</b>
+                            </p>
+
+                        </div>
+
                         <div className="col-12 pt-5">
 
                             {rooms && rooms.map && rooms.map((item, key) => {
@@ -155,7 +165,7 @@ function DetailsModal({toggle, handleBookNow, modal, selectedRoom, startDate, en
         selectedRoom.bookings.forEach(element => {
             if (
                 new Date(element.end_date) < new Date(startDate) ||
-                new Date(element.end_date) > new Date(endDate)
+                new Date(element.start_date) > new Date(endDate)
             ) {
             } else {
                 reservation_count = reservation_count + 1
@@ -175,6 +185,20 @@ function DetailsModal({toggle, handleBookNow, modal, selectedRoom, startDate, en
                 <p className="card-text mb-0">Locuri ocupate:</p>
                 <p className="card-text">{reservation_count} din {selectedRoom.capacity || "0"}</p>
                 <p className="card-text">Type: {selectedRoom.type || ""}</p>
+
+                {selectedRoom.bookings && selectedRoom.bookings.map && (
+                    <p className="card-text">Bookings:</p>
+                )}
+
+                {selectedRoom.bookings && selectedRoom.bookings.map && selectedRoom.bookings.map((item, key) => {
+
+                    return (
+                        <p key={key} className={`mb-0 ${(new Date(item.end_date) < new Date(startDate) ||
+                            new Date(item.start_date) > new Date(endDate)) && "text-success"}`}>
+                            {key + 1}) {item.user.name}, {new Date(item.start_date).toLocaleDateString()} -> {new Date(item.end_date).toLocaleDateString()}
+                        </p>
+                    )
+                })}
 
             </ModalBody>
             <ModalFooter>
@@ -206,7 +230,7 @@ function RoomCard({
         room.bookings.forEach(element => {
             if (
                 new Date(element.end_date) < new Date(startDate) ||
-                new Date(element.end_date) > new Date(endDate)
+                new Date(element.start_date) > new Date(endDate)
             ) {
             } else {
                 console.log('count +1', {

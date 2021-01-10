@@ -70,6 +70,9 @@ class HomeController {
         this.router.post("/update-booking", authenticateJWT, (req, resp, next) =>
             this.updateBooking(req, resp, next)
         );
+        this.router.post("/delete-booking", authenticateJWT, (req, resp, next) =>
+            this.deleteBooking(req, resp, next)
+        );
 
         this.router.get("/requests", (req, resp, next) =>
             this.getRequests(req, resp, next)
@@ -129,7 +132,7 @@ class HomeController {
             .fetchAll({
                 withRelated: [
                     "block",
-                    "bookings"
+                    "bookings.user"
                 ]
             })
             .then(r => {
@@ -329,6 +332,19 @@ class HomeController {
             .update({
                 ...data
             })
+            .then(r => {
+                return resp.json({
+                    status: true,
+                })
+            })
+    }
+
+    async deleteBooking(req, resp, next) {
+        let request = req.body
+
+        knex("bookings")
+            .where("id", request.id)
+            .del()
             .then(r => {
                 return resp.json({
                     status: true,

@@ -36,6 +36,17 @@ function RezervariList() {
                 })
     }
 
+    function handleDelete(item = {}) {
+        if (item.id)
+            axios.post(`${process.env.REACT_APP_API_HOST}/delete-booking`, {...item})
+                .then(data => {
+                    let resp = data.data || {}
+                    if (resp.status) {
+                        fetchData()
+                    }
+                })
+    }
+
 
     function handleSave() {
         if (newItem && newItem.nr && newItem.block_id)
@@ -173,7 +184,10 @@ function RezervariList() {
                                         >
                                             <FaEdit/>
                                         </button>
-                                        <button type="button" className="btn btn-danger">
+                                        <button
+                                            type="button" className="btn btn-danger"
+                                            onClick={() => handleDelete({...item})}
+                                        >
                                             <FaTrashAlt/>
                                         </button>
                                     </td>

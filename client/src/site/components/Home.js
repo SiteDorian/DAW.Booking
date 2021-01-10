@@ -104,6 +104,7 @@ function Home() {
                                                         name={"start_date"}
                                                         value={state.start_date || ""}
                                                         onChange={onChange}
+                                                        {...state.end_date && {max: state.end_date}}
                                                     />
                                                 </div>
                                                 <span className="in-out hidden-xs">&#8652;</span>
@@ -118,6 +119,7 @@ function Home() {
                                                         name={"end_date"}
                                                         value={state.end_date || ""}
                                                         onChange={onChange}
+                                                        {...state.start_date && {min: state.start_date}}
                                                     />
                                                 </div>
                                             </div>
