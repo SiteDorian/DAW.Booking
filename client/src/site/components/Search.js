@@ -13,6 +13,9 @@ function Search(props) {
     const [roomId, setRoomId] = useState(false);
     const [selectedRoom, setSelectedRoom] = useState(null);
 
+    const [activeBookingError, setActiveBookingError] = useState(false)
+    const [activeBooking, setActiveBooking] = useState(false)
+
     const toggle = ({room = null}) => {
         setModal(!modal)
         if (room)
@@ -23,7 +26,7 @@ function Search(props) {
 
     useEffect(() => {
         let _state = props.location && props.location.state || {}
-        if (!_state.email) {
+        if (!_state.email || !_state.idnp) {
             history.push('/')
         } else {
             props.setEmail(_state.email)
@@ -33,23 +36,33 @@ function Search(props) {
     }, [])
 
     useEffect(() => {
-        axios.get(`${process.env.REACT_APP_API_HOST}/account`, {
-            params: {
-                email: props.email
-            }
-        })
-            .then(data => {
-                let resp = data.data || {}
-                if (resp.status) {
-                    setUser({...resp.item})
+        if (state.email && state.idnp) {
+            axios.get(`${process.env.REACT_APP_API_HOST}/account`, {
+                params: {
+                    email: state.email,
+                    idnp: state.idnp
                 }
             })
-    }, [props.email])
+                .then(data => {
+                    let resp = data.data || {}
+                    if (resp.status) {
+                        props.setEmail(state.email)
+                        localStorage.setItem("email", state.email)
+                        localStorage.setItem("idnp", state.idnp)
+                        setUser({...resp.item})
+                    } else {
+                        localStorage.setItem("idnp", "")
+                        history.push('/')
+                    }
+                })
+        }
+    }, [state.email, state.idnp])
 
     useEffect(() => {
         axios.get(`${process.env.REACT_APP_API_HOST}/rooms`, {
             params: {
-                ...state
+                ...state,
+                type: 'available'
             }
         })
             .then(data => {
@@ -60,22 +73,43 @@ function Search(props) {
             })
     }, [state])
 
+    useEffect(() => {
+        console.log('user', user)
+        //verifica daca nu exista vre-o rezervare activa
+        setActiveBookingError(false)
+        setActiveBooking(false)
+        if (user) {
+            if (user.bookings && user.bookings.length > 0) {
+                user.bookings.forEach(element => {
+                    if (
+                        !(new Date(element.end_date) < new Date(state.start_date) ||
+                        new Date(element.start_date) > new Date(state.end_date))
+                    ) {
+                        setActiveBookingError(true)
+                        setActiveBooking(true)
+                    }
+                })
 
-    const handleSendRequest = ({room_id = null, user_id=null, start_date = null, end_date = null}) => {
-        axios.get(`${process.env.REACT_APP_API_HOST}/create-request`, {
-            params: {
-                ...state
             }
+        }
+    }, [user, state.start_date, state.end_date])
+
+
+    const handleSendRequest = ({room_from_id = null, room_to_id = null, user_id=null}) => {
+        axios.post(`${process.env.REACT_APP_API_HOST}/create-request`, {
+            room_from_id: room_from_id,
+            room_to_id: room_to_id,
+            user_id: user_id
         })
             .then(data => {
                 let resp = data.data || {}
-                if (resp.status)
-                    setRooms([...resp.data])
-                console.log("resp", resp.data)
+                if (resp.status) {
+                    history.push("/account")
+                }
             })
     }
 
-    const handleBookNow = ({room_id = null, user_id=null, start_date = null, end_date = null}) => {
+    const handleBookNow = ({room_id = null, user_id=null, start_date = state.start_date, end_date = state.end_date}) => {
         axios.post(`${process.env.REACT_APP_API_HOST}/create-booking`, {
             room_id, user_id, start_date, end_date
         })
@@ -86,6 +120,11 @@ function Search(props) {
                 }
             })
     }
+
+    const userActiveBooking = user && user.bookings && user.bookings.find(element =>
+        !(new Date(element.end_date) < new Date(state.start_date) ||
+            new Date(element.start_date) > new Date(state.end_date))
+    )
 
     console.log("state", state)
 
@@ -102,7 +141,7 @@ function Search(props) {
                         <div className="col-12">
                             <h5>
                                 Blocul nr.{state.block || "<i> undefined block number</i>"}
-                                <span> Studentilor Street 10/2</span>
+                                <span> Studentilor Street 1</span>
                             </h5>
                         </div>
 
@@ -130,8 +169,14 @@ function Search(props) {
                                             start_date: state.start_date,
                                             end_date: state.end_date,
                                         })}
+                                        handleSendRequest={() => handleSendRequest({
+                                            user_id: user.id,
+                                            room_to_id: item.id,
+                                            room_from_id: userActiveBooking && userActiveBooking.room.id
+                                        })}
                                         startDate={state.start_date}
                                         endDate={state.end_date}
+                                        activeBooking={activeBooking}
                                     />
                                 )
                             })}
@@ -145,12 +190,40 @@ function Search(props) {
             {selectedRoom && (
                 <DetailsModal
                     toggle={toggle}
-                    handleBookNow={handleBookNow}
+                    handleBookNow={() => handleBookNow({
+                        user_id: user.id,
+                        room_id: selectedRoom.id,
+                    })}
+                    handleSendRequest={() => handleSendRequest({
+                        user_id: user.id,
+                        room_to_id: selectedRoom.id,
+                        room_from_id: userActiveBooking && userActiveBooking.room.id
+                    })}
                     selectedRoom={selectedRoom}
                     modal={modal}
                     startDate={state.start_date}
                     endDate={state.end_date}
+                    activeBooking={activeBooking}
                 />
+            )}
+
+            {activeBookingError && (
+                <Modal
+                    isOpen={activeBookingError}
+                    toggle={() => setActiveBookingError(false)}
+                >
+                    <ModalHeader toggle={() => setActiveBookingError(false)}>
+                        Booking warning
+                    </ModalHeader>
+                    <ModalBody>
+                        <p>Pentru perioada selectata aveti deja o rezervare activa.</p>
+                        <p>Nu se permit mai multe rezervari pentru aceiasi perioada.</p>
+                        <p>Aveti posibilitatea sa faceti o cerere de schimbare a camerei</p>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button color="primary" onClick={() => setActiveBookingError(false)}>Ok</Button>
+                    </ModalFooter>
+                </Modal>
             )}
 
 
@@ -158,7 +231,7 @@ function Search(props) {
     )
 }
 
-function DetailsModal({toggle, handleBookNow, modal, selectedRoom, startDate, endDate}) {
+function DetailsModal({toggle, handleBookNow, handleSendRequest, modal, selectedRoom, startDate, endDate, activeBooking=false}) {
 
     let reservation_count = 0
     if (selectedRoom.bookings && selectedRoom.bookings.length > 0) {
@@ -182,9 +255,11 @@ function DetailsModal({toggle, handleBookNow, modal, selectedRoom, startDate, en
             <ModalBody>
                 <p className="card-text mb-0">Etaj: {selectedRoom.etaj}</p>
                 <p className="card-text">Blocul: {selectedRoom.block_id}</p>
-                <p className="card-text mb-0">Locuri ocupate:</p>
+                <p className="card-text mb-0">Locuri ocupate in perioada aleasa:</p>
                 <p className="card-text">{reservation_count} din {selectedRoom.capacity || "0"}</p>
-                <p className="card-text">Type: {selectedRoom.type || ""}</p>
+                {selectedRoom.type && (
+                    <p className="card-text">Type: {selectedRoom.type || ""}</p>
+                )}
 
                 {selectedRoom.bookings && selectedRoom.bookings.map && (
                     <p className="card-text">Bookings:</p>
@@ -205,14 +280,13 @@ function DetailsModal({toggle, handleBookNow, modal, selectedRoom, startDate, en
                 <Button color={selectedRoom.type !== 'rezervat' && selectedRoom.capacity > reservation_count ? "primary": 'danger'} onClick={() => {
                     if (selectedRoom.type !== 'rezervat' && selectedRoom.capacity > reservation_count) {
                         toggle({room: null})
-                        handleBookNow({
-                            user_id: selectedRoom.id,
-                            room_id: selectedRoom.id,
-                            start_date: startDate,
-                            end_date: endDate,
-                        })
+                        if (activeBooking) {
+                            handleSendRequest()
+                        } else {
+                            handleBookNow()
+                        }
                     }
-                }}>Book Now</Button>{' '}
+                }}>{activeBooking ? "Send Request" : "Book Now"}</Button>{' '}
                 <Button color="secondary" onClick={toggle}>Cancel</Button>
             </ModalFooter>
         </Modal>
@@ -221,8 +295,8 @@ function DetailsModal({toggle, handleBookNow, modal, selectedRoom, startDate, en
 
 function RoomCard({
                       room = {}, toggle = () => {
-    }, handleBookNow = () => {},
-    startDate, endDate
+    }, handleBookNow = () => {}, handleSendRequest = () => null,
+    startDate, endDate, activeBooking
                   }) {
 
     let reservation_count = 0
@@ -285,16 +359,29 @@ function RoomCard({
                 >
                     View details
                 </button>
-                <button
-                    className={`btn btn-outline-primary ${(room.type == 'rezervat' || room.capacity <= reservation_count) && 'btn-outline-danger'}`}
-                    onClick={() => {
-                        if (room.type !== 'rezervat' && room.capacity > reservation_count) {
-                            handleBookNow()
-                        }
-                    }}
-                >
-                    Book Now
-                </button>
+                {!activeBooking ? (
+                    <button
+                        className={`btn btn-outline-primary ${(room.type == 'rezervat' || room.capacity <= reservation_count) && 'btn-outline-danger'}`}
+                        onClick={() => {
+                            if (room.type !== 'rezervat' && room.capacity > reservation_count) {
+                                handleBookNow()
+                            }
+                        }}
+                    >
+                        Book Now
+                    </button>
+                ) : (
+                    <button
+                        className={`btn btn-outline-primary ${(room.type == 'rezervat' || room.capacity <= reservation_count) && 'btn-outline-danger'}`}
+                        onClick={() => {
+                            if (room.type !== 'rezervat' && room.capacity > reservation_count) {
+                                handleSendRequest()
+                            }
+                        }}
+                    >
+                        Change Now
+                    </button>
+                )}
             </div>
         </div>
     )

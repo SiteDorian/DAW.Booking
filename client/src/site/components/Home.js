@@ -1,9 +1,14 @@
 import React, {useState} from "react";
 import "./Home.css"
 import { useHistory } from 'react-router-dom';
+import moment from "moment";
 
 function Home() {
-    const [state, setState] = useState({block: 1, guests: 1, email: localStorage.getItem("email") || ""})
+    const [state, setState] = useState({
+        block: 1, guests: 1,
+        email: localStorage.getItem("email") || "",
+        idnp: localStorage.getItem("idnp") || "",
+    })
     const history = useHistory();
 
     function onChange(e) {
@@ -105,6 +110,7 @@ function Home() {
                                                         value={state.start_date || ""}
                                                         onChange={onChange}
                                                         {...state.end_date && {max: state.end_date}}
+                                                        min={moment().format('YYYY-MM-DD')}
                                                     />
                                                 </div>
                                                 <span className="in-out hidden-xs">&#8652;</span>

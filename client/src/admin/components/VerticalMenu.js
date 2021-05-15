@@ -13,7 +13,7 @@ function VerticalMenu(props) {
                         onClick={() => props.history.push("/admin")}
                     >
                         <span>
-                            DAW.Booking Admin
+                            DAWG.Booking Admin
                         </span>
                     </a>
                 </li>
@@ -34,6 +34,9 @@ function VerticalMenu(props) {
                 </li>
                 <li className="nav-item">
                     <Link className="nav-link" to="/admin/students">Studenti</Link>
+                </li>
+                <li className="nav-item">
+                    <Link className="nav-link" to="/admin/automatizare">Automatizare</Link>
                 </li>
                 <li className="nav-item">
                     <Link className="nav-link disabled" to="#">Data Load</Link>

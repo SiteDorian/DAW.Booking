@@ -5,7 +5,7 @@ var BlockBs = bs.model('blocks', {
     tableName: 'blocks',
 
     rooms: function () {
-        return this.hasMany(RoomBs, "id", "block_id")
+        return this.hasMany('rooms', "block_id", "id")
     }
 });
 

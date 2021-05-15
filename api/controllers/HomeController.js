@@ -2,6 +2,8 @@ var knex = require("../config/knex");
 var RoomBs = require("../models/RoomModel")
 var UserBs = require("../models/UserModel")
 var BookingBs = require("../models/BookingModel")
+var RequestBs = require("../models/RequestModel")
+var BlockBs = require("../models/BlockModel")
 const jwt = require('jsonwebtoken');
 
 const accessTokenSecret = 'youraccesstokensecret';
@@ -38,6 +40,16 @@ class HomeController {
 
         this.router.get("/blocks", (req, resp, next) =>
             this.getAllBlocks(req, resp, next)
+        );
+
+        this.router.get("/blocks-rooms", authenticateJWT, (req, resp, next) =>
+            this.getBlocksRooms(req, resp, next)
+        );
+        this.router.post("/create-block", authenticateJWT, (req, resp, next) =>
+            this.createBlock(req, resp, next)
+        );
+        this.router.post("/update-block", authenticateJWT, (req, resp, next) =>
+            this.updateBlock(req, resp, next)
         );
         this.router.get("/rooms", (req, resp, next) =>
             this.getRooms(req, resp, next)
@@ -88,13 +100,26 @@ class HomeController {
     async getAccount(req, resp, next) {
         let request = req.query || {}
 
-        let user = await UserBs.where("email", request.email)
+        let user = await UserBs.query(q => {
+            q.where("email", request.email || "")
+            q.whereRaw("?? like ?", [
+                "idnp",
+                `%${request.idnp}`
+            ])
+        })
             .fetch({
                 withRelated: [
-                    "bookings.room",
-                    "requests"
+                    "bookings.room.block",
+                    "requests.room_from.block",
+                    "requests.room_to.block",
                 ]
+            }).catch(e => console.log('getAccount', e))
+
+        if (!user) {
+            return resp.json({
+                status: false
             })
+        }
 
         return resp.json({
             status: true,
@@ -108,6 +133,77 @@ class HomeController {
                 return resp.json({
                     status: true,
                     data: data
+                })
+            })
+    }
+
+    async getBlocksRooms(req, resp, next) {
+        return BlockBs
+            .fetchAll({
+                withRelated: [
+                    "rooms",
+                ]
+        })
+            .then(r => {
+                let data = r ? r.serialize() : []
+                return resp.json({
+                    status: true,
+                    data: data
+                })
+            })
+            .catch(e => console.log('getBlocksRooms error', e))
+    }
+
+    async updateBlock(req, resp, next) {
+        let request = req.body
+
+        console.log("request", request)
+
+        let data = {
+            nr: request.nr || "",
+            address: request.address || "",
+            description: request.description || ""
+        }
+
+        knex("blocks")
+            .where("id", request.id)
+            .update({
+                ...data
+            })
+            .then(r => {
+                return resp.json({
+                    status: true,
+                })
+            })
+    }
+
+    async createBlock(req, resp, next) {
+        let request = req.body
+
+        let data = {
+            nr: request.nr || "",
+            address: request.address || "",
+            description: request.description || ""
+        }
+
+        knex("blocks")
+            .insert(data)
+            .then(r => {
+                return resp.json({
+                    status: true,
+                })
+            })
+    }
+
+    async deleteBlock(req, resp, next) {
+        let request = req.body
+
+        knex("blocks")
+            .where("id", request.id)
+            .del()
+            .then(r => {
+                return resp.json({
+                    status: true,
                 })
             })
     }
@@ -127,7 +223,9 @@ class HomeController {
                 if (request.guests) {
                     q.where("capacity", ">=", request.guests)
                 }
-
+                if (request.type && request.type === 'available') {
+                    q.where("type", "<>", 'rezervat')
+                }
             })
             .fetchAll({
                 withRelated: [
@@ -235,7 +333,7 @@ class HomeController {
             year: request.year || "",
             grupa: request.grupa || "",
             departament: request.departament || "",
-            necesita_cazare: request.necesita_cazare || "",
+            necesita_cazare: request.necesita_cazare ? 1 : 0 || "",
         }
 
         knex("users")
@@ -257,7 +355,7 @@ class HomeController {
             year: request.year || "",
             grupa: request.grupa || "",
             departament: request.departament || "",
-            necesita_cazare: request.necesita_cazare || "",
+            necesita_cazare: request.necesita_cazare ? 1 : 0 || "",
         }
 
         knex("users")
@@ -275,7 +373,60 @@ class HomeController {
     async getBookings(req, resp, next) {
         let request = req.query || {}
 
-        BookingBs.fetchAll({
+        BookingBs.query(q => {
+            if (request.block) {
+                q.whereExists(
+                    knex("rooms").whereRaw("??.?? = ??.??", [
+                        "bookings", "room_id",
+                        "rooms", "id"
+                    ]).whereExists(
+                        knex("blocks").whereRaw("??.?? = ??.?? and ??.?? = ?", [
+                            "rooms", "block_id",
+                            "blocks", "id",
+                            "blocks", "nr",
+                            request.block
+                        ])
+                    )
+                )
+            }
+            if (request.etaj) {
+                q.whereExists(
+                    knex("rooms").whereRaw("??.?? = ??.?? and ?? = ?", [
+                        "bookings", "room_id",
+                        "rooms", "id",
+                        "etaj", request.etaj
+                    ])
+                )
+            }
+            if (request.room) {
+                q.whereExists(
+                    knex("rooms").whereRaw("??.?? = ??.?? and ?? = ?", [
+                        "bookings", "room_id",
+                        "rooms", "id",
+                        "nr", request.room
+                    ])
+                )
+            }
+            if (request.email) {
+                q.whereExists(
+                    knex("users").whereRaw("??.?? = ??.?? and ?? like ?", [
+                        "bookings", "user_id",
+                        "users", "id",
+                        "email",
+                        `%${request.email}%`
+                    ])
+                )
+            }
+            if (request.active) {
+                q.whereRaw("?? < ? and ?? >= ?", [
+                    "start_date",
+                    new Date(),
+                    "end_date",
+                    new Date()
+                ])
+            }
+        })
+            .fetchAll({
             withRelated: [
                 "user",
                 "room"
@@ -355,13 +506,62 @@ class HomeController {
     async getRequests(req, resp, next) {
         let request = req.query || {}
 
-        knex("requests").select("*")
-            .then(data => {
+        RequestBs.query(q => {
+
+            if (request.room_from_id) {
+                q.whereExists(
+                    knex("rooms").whereRaw("??.?? = ??.?? and ?? = ?", [
+                        "requests", "room_from_id",
+                        "rooms", "id",
+                        "nr", request.room_from_id
+                    ])
+                )
+            }
+            if (request.room_to_id) {
+                q.whereExists(
+                    knex("rooms").whereRaw("??.?? = ??.?? and ?? = ?", [
+                        "requests", "room_to_id",
+                        "rooms", "id",
+                        "nr", request.room_to_id
+                    ])
+                )
+            }
+            if (request.email) {
+                q.whereExists(
+                    knex("users").whereRaw("??.?? = ??.?? and ?? like ?", [
+                        "requests", "user_id",
+                        "users", "id",
+                        "email",
+                        `%${request.email}%`
+                    ])
+                )
+            }
+            if (request.status) {
+                q.where('status', request.status)
+            }
+        })
+            .fetchAll({
+                withRelated: [
+                    "user",
+                    "room_from",
+                    "room_to"
+                ]
+            })
+            .then(r => {
+                let data = r ? r.serialize() : []
                 return resp.json({
                     status: true,
                     data: data
                 })
             })
+
+        // knex("requests").select("*")
+        //     .then(data => {
+        //         return resp.json({
+        //             status: true,
+        //             data: data
+        //         })
+        //     })
     }
 
     async createRequest(req, resp, next) {
@@ -371,9 +571,10 @@ class HomeController {
             room_from_id: request.room_from_id || "",
             room_to_id: request.room_to_id || "",
             user_id: request.user_id || "",
+            status: request.status || "draft"
         }
 
-        knex("bookings")
+        knex("requests")
             .insert(data)
             .then(r => {
                 return resp.json({

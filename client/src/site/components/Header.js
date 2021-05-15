@@ -9,7 +9,7 @@ function Header(props) {
     return (
         <header>
             <nav className="navbar fixed-top navbar-light bg-light">
-                <a className="navbar-brand" href="/">DAW.Booking</a>
+                <a className="navbar-brand" href="/">DAWG.Booking</a>
 
                 <span
                     className="navbar-text"

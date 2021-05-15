@@ -8,13 +8,18 @@ function RoomsList() {
     const [blocks, setBlocks] = useState([])
     const [newItem, setNewItem] = useState({})
 
+    const [filter, setFilter] = useState({
+        block: 1,
+        // etaj: 1
+    })
+
     useEffect(() => {
         fetchData()
         fetchBlocksList()
     }, [])
 
     function fetchData() {
-        axios.get(`${process.env.REACT_APP_API_HOST}/rooms`)
+        axios.get(`${process.env.REACT_APP_API_HOST}/rooms`, {params: {...filter}})
             .then(data => {
                 let resp = data.data || {}
                 if (resp.status)
@@ -64,6 +69,42 @@ function RoomsList() {
             <div className={"row"}>
                 <div className={"col-12"}>
                     <h1>Lista de camere</h1>
+                </div>
+                <div className={"col-12 py-2"}>
+                    <div className={"col-12 border p-2"}>
+                        <div className={"row align-items-end"}>
+                            <div className={"col-12"}>
+                                <h5>Filter</h5>
+                            </div>
+                            <div className="col-3 ">
+                                <label htmlFor="exampleFormControlInput1" className="form-label">Blocul</label>
+                                <input
+                                    type="number"
+                                    className="form-control" id="exampleFormControlInput1"
+                                    placeholder="1"
+                                    value={filter.block || ""}
+                                    onChange={event => setFilter({...filter, block: Number(event.target.value) || ''})}
+                                />
+                            </div>
+                            <div className="col-3 ">
+                                <label htmlFor="exampleFormControlInput2" className="form-label">Etajul</label>
+                                <input
+                                    type="number" className="form-control" id="exampleFormControlInput2"
+                                    placeholder=""
+                                    value={filter.etaj || ""}
+                                    onChange={event => setFilter({...filter, etaj: Number(event.target.value) || ''})}
+                                />
+                            </div>
+                            <div className="col ">
+                                <button
+                                    type="button" className="btn btn-primary d-flex ml-auto mr-2"
+                                    onClick={() => fetchData()}
+                                >
+                                    Search
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div className={"col-12 mt-4"} style={{paddingBottom: '150px'}}>
                     <table className={"table table-bordered"}>

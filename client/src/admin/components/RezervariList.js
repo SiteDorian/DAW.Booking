@@ -4,23 +4,45 @@ import {FaCheck, FaEdit, FaTrashAlt} from "react-icons/fa";
 
 function RezervariList() {
 
+    const [filter, setFilter] = useState({block: 1, active: true})
     const [items, setItems] = useState([])
     const [blocks, setBlocks] = useState([])
+    const [rooms, setRooms] = useState([])
     const [newItem, setNewItem] = useState({})
 
     useEffect(() => {
         fetchData()
-        // fetchBlocksList()
+        fetchBlocksList()
+        fetchRooms()
     }, [])
 
 
     function fetchData() {
-        axios.get(`${process.env.REACT_APP_API_HOST}/bookings`)
+        axios.get(`${process.env.REACT_APP_API_HOST}/bookings`, {params: {...filter}})
             .then(data => {
                 let resp = data.data || {}
                 if (resp.status)
                     setItems([...resp.data])
                 console.log("resp", resp.data)
+            })
+    }
+
+    function fetchRooms() {
+        axios.get(`${process.env.REACT_APP_API_HOST}/rooms`, {params: {...filter}})
+            .then(data => {
+                let resp = data.data || {}
+                if (resp.status)
+                    setRooms([...resp.data])
+                console.log("resp", resp.data)
+            })
+    }
+
+    function fetchBlocksList() {
+        axios.get(`${process.env.REACT_APP_API_HOST}/blocks`)
+            .then(data => {
+                let resp = data.data || {}
+                if (resp.status)
+                    setBlocks([...resp.data])
             })
     }
 
@@ -68,13 +90,75 @@ function RezervariList() {
                     <h1>Lista de rezervari</h1>
                 </div>
 
+                <div className={"col-12 py-2"}>
+                    <div className={"col-12 border p-2"}>
+                        <div className={"row align-items-end"}>
+                            <div className={"col-12"}>
+                                <h5>Filter</h5>
+                            </div>
+                            <div className="col-2 ">
+                                <label htmlFor="exampleFormControlInput1" className="form-label">Blocul</label>
+                                <input
+                                    type="number"
+                                    className="form-control" id="exampleFormControlInput1"
+                                    placeholder="1"
+                                    value={filter.block || ""}
+                                    onChange={event => setFilter({...filter, block: Number(event.target.value) || ''})}
+                                />
+                            </div>
+                            <div className="col-2 ">
+                                <label htmlFor="exampleFormControlInput2" className="form-label">Etajul</label>
+                                <input
+                                    type="number" className="form-control" id="exampleFormControlInput2"
+                                    placeholder=""
+                                    value={filter.etaj || ""}
+                                    onChange={event => setFilter({...filter, etaj: Number(event.target.value) || ''})}
+                                />
+                            </div>
+                            <div className="col-2 ">
+                                <label htmlFor="exampleFormControlInput2" className="form-label">Camera</label>
+                                <input
+                                    type="number" className="form-control" id="exampleFormControlInput2"
+                                    placeholder=""
+                                    value={filter.room || ""}
+                                    onChange={event => setFilter({...filter, room: Number(event.target.value) || ''})}
+                                />
+                            </div>
+                            <div className="col-3 ">
+                                <label htmlFor="exampleFormControlInput2" className="form-label">Email</label>
+                                <input
+                                    type="text" className="form-control" id="exampleFormControlInput2"
+                                    placeholder="User email"
+                                    value={filter.email || ""}
+                                    onChange={event => setFilter({...filter, email: event.target.value || ''})}
+                                />
+                            </div>
+                            <div className="col-1 ">
+                                <label htmlFor="exampleFormControlInput2" className="form-label">Active</label>
+                                <input
+                                    type="checkbox" className="form-control" id="exampleFormControlInput2"
+                                    checked={filter.active || ""}
+                                    onChange={event => setFilter({...filter, active: !filter.active || ''})}
+                                />
+                            </div>
+                            <div className="col ">
+                                <button
+                                    type="button" className="btn btn-primary d-flex ml-auto mr-2 mt-3"
+                                    onClick={() => fetchData()}
+                                >
+                                    Search
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div className={"col-12 mt-4"} style={{paddingBottom: '150px'}}>
                     <table className={"table table-bordered"}>
                         <thead>
                         <tr>
                             <th scope="col">ID.</th>
-                            <th scope="col">Room Nr.</th>
-                            <th scope="col">Room [A/B]</th>
+                            <th scope="col">Room</th>
                             <th scope="col">User Email</th>
                             <th scope="col">Start Date</th>
                             <th scope="col">End Date</th>
@@ -88,31 +172,44 @@ function RezervariList() {
                                 return (
                                     <tr>
                                         <th scope="row"></th>
-                                        <td>
-                                            <input
-                                                type="number" min={0} max={9999} value={item.room.nr || ""}
-                                                onChange={event => {
-                                                    items[key].nr = event.target.value
-                                                    setItems([...items])
-                                                }}
-                                            />
-                                        </td>
+                                        {/*<td>*/}
+                                        {/*    <input*/}
+                                        {/*        type="number" min={0} max={9999} value={item.room.nr || ""}*/}
+                                        {/*        onChange={event => {*/}
+                                        {/*            items[key].nr = event.target.value*/}
+                                        {/*            setItems([...items])*/}
+                                        {/*        }}*/}
+                                        {/*    />*/}
+                                        {/*</td>*/}
                                         <td>
                                             <select
-                                                value={item.room.camera || ""}
+                                                value={item.room_id || ""}
                                                 onChange={event => {
-                                                    items[key].camera = event.target.value
+                                                    items[key].room_id = event.target.value
                                                     setItems([...items])
                                                 }}
                                             >
-                                                <option value={''}/>
-                                                <option value={'A'}>A</option>
-                                                <option value={'B'}>B</option>
+                                                {rooms && rooms.map && rooms.map((item, key) => (
+                                                    <option value={item.id}>{`${item.nr} ${item.camera}`}</option>
+                                                ))}
                                             </select>
                                         </td>
+                                        {/*<td>*/}
+                                        {/*    <select*/}
+                                        {/*        value={item.room.camera || ""}*/}
+                                        {/*        onChange={event => {*/}
+                                        {/*            items[key].camera = event.target.value*/}
+                                        {/*            setItems([...items])*/}
+                                        {/*        }}*/}
+                                        {/*    >*/}
+                                        {/*        <option value={''}/>*/}
+                                        {/*        <option value={'A'}>A</option>*/}
+                                        {/*        <option value={'B'}>B</option>*/}
+                                        {/*    </select>*/}
+                                        {/*</td>*/}
                                         <td>{item.user.email}</td>
-                                        <td>{item.start_date}</td>
-                                        <td>{item.end_date}</td>
+                                        <td>{new Date(item.start_date).toLocaleDateString()|| ""}</td>
+                                        <td>{new Date(item.end_date).toLocaleDateString() || ""}</td>
                                         {/*<td>*/}
                                         {/*    <input*/}
                                         {/*        type="number" min={1} max={9} value={item.room.capacity || ""}*/}
@@ -168,11 +265,10 @@ function RezervariList() {
                             return (
                                 <tr key={key}>
                                     <th scope="row">{item.id}</th>
-                                    <td>{item.room.nr}</td>
-                                    <td>{item.room.camera || "-"}</td>
+                                    <td>{item.room.nr} {item.room.camera || ""}</td>
                                     <td>{item.user.email}</td>
-                                    <td>{item.start_date || ""}</td>
-                                    <td>{item.end_date || ""}</td>
+                                    <td>{new Date(item.start_date).toLocaleDateString()|| ""}</td>
+                                    <td>{new Date(item.end_date).toLocaleDateString() || ""}</td>
                                     <td>
                                         <button
                                             type="button"

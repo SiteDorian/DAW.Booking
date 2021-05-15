@@ -8,17 +8,19 @@ function Account(props) {
     const history = useHistory()
 
     const [email, setEmail] = useState(localStorage.getItem('email'))
+    const [idnp, setIdnp] = useState(localStorage.getItem('idnp'))
 
     const [item, setItem] = useState(null)
 
     useEffect(() => {
-        if (!email) {
+        if (!email || !idnp) {
             history.push('/')
         }
 
         axios.get(`${process.env.REACT_APP_API_HOST}/account`, {
             params: {
-                email
+                email,
+                idnp
             }
         })
             .then(data => {
@@ -54,6 +56,16 @@ function Account(props) {
                                         Cererile mele:
                                     </p>
 
+                                    <ul className={""}>
+                                        {item && item.requests && item.requests.map && item.requests.map((request, key) => (
+                                            <li key={key}>
+                                                Blocul {request.room_from.block.nr}, {request.room_from.nr}{request.room_from.camera} ->&nbsp;
+                                                Blocul {request.room_to.block.nr}, {request.room_to.nr}{request.room_to.camera}, &nbsp;
+                                                Status - {request.status || 'draft'}
+                                            </li>
+                                        ))}
+                                    </ul>
+
                                     <p className="card-text">
                                         Rezervarile mele:
                                     </p>
@@ -61,7 +73,7 @@ function Account(props) {
                                     <ul className={""}>
                                         {item && item.bookings && item.bookings.map && item.bookings.map((booking, key) => (
                                             <li key={key}>
-                                                {booking.room.nr}{booking.room.camera}, &nbsp;
+                                                Blocul {booking.room.block.nr}, {booking.room.nr}{booking.room.camera}, &nbsp;
                                                 {moment(booking.start_date).format("MM/DD/YYYY")} -> {moment(booking.end_date).format("MM/DD/YYYY")}
                                             </li>
                                         ))}
