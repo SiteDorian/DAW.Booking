@@ -51,9 +51,7 @@ function App() {
                             <>
                                 <Header email={email}/>
 
-                                <main style={{
-                                    // marginTop: '50px'
-                                }}>
+                                <main>
                                     <Switch>
                                         <Route path={'/'} exact component={Home}/>
                                         <Route

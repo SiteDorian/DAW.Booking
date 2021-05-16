@@ -7,8 +7,8 @@ import moment from "moment"
 function Account(props) {
     const history = useHistory()
 
-    const [email, setEmail] = useState(localStorage.getItem('email'))
-    const [idnp, setIdnp] = useState(localStorage.getItem('idnp'))
+    const email = localStorage.getItem('email')
+    const idnp = localStorage.getItem('idnp')
 
     const [item, setItem] = useState(null)
 

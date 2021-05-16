@@ -1,5 +1,4 @@
 var bs = require("../config/bs");
-var BlockBs = require("../models/BlockModel")
 var RequestBs = require("../models/RequestModel")
 var BookingBs = require("../models/BookingModel")
 

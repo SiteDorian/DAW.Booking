@@ -66,6 +66,9 @@ class HomeController {
         this.router.get("/users", authenticateJWT, (req, resp, next) =>
             this.getUsers(req, resp, next)
         );
+        this.router.get("/users-booking", authenticateJWT, (req, resp, next) =>
+            this.getUsersForBooking(req, resp, next)
+        );
         this.router.post("/create-user", authenticateJWT, (req, resp, next) =>
             this.createUser(req, resp, next)
         );
@@ -94,6 +97,9 @@ class HomeController {
         );
         this.router.post("/update-request", authenticateJWT, (req, resp, next) =>
             this.updateRequest(req, resp, next)
+        );
+        this.router.post("/auto-booking", authenticateJWT, (req, resp, next) =>
+            this.createAutoBooking(req, resp, next)
         );
     }
 
@@ -133,6 +139,11 @@ class HomeController {
                 return resp.json({
                     status: true,
                     data: data
+                })
+            })
+            .catch(er => {
+                return resp.json({
+                    status: false,
                 })
             })
     }
@@ -241,14 +252,6 @@ class HomeController {
                 })
             })
             .catch(e => console.log('GetRooms error', e))
-
-        // knex("rooms").select("*")
-        //     .then(data => {
-        //         return resp.json({
-        //             status: true,
-        //             data: data
-        //         })
-        //     })
     }
 
     async updateRoom(req, resp, next) {
@@ -314,11 +317,84 @@ class HomeController {
     async getUsers(req, resp, next) {
         let request = req.query || {}
 
-        knex("users").select("*")
-            .then(data => {
+        return UserBs.query(q => {
+            if (request.name) {
+                q.where("name", "like", `%${request.name}%`)
+            }
+            if (request.email) {
+                q.where("email", "like", `%${request.email}%`)
+            }
+            if (request.departament) {
+                q.where("departament", "like", `%${request.departament}%`)
+            }
+            if (request.type) {
+                q.where("type", "like", `%${request.type}%`)
+            }
+            if (request.grupa) {
+                q.where("grupa", "like", `%${request.grupa}%`)
+            }
+            if (request.necesita_cazare) {
+                q.where("necesita_cazare", 1)
+            }
+        })
+            .fetchAll()
+            .then(r => {
+                let data = r ? r.serialize() : []
                 return resp.json({
                     status: true,
                     data: data
+                })
+            })
+            .catch(e => {
+                console.log('getUsers error', e)
+                return resp.json({
+                    status: false
+                })
+            })
+
+    }
+
+    async getUsersForBooking(req, resp, next) {
+        let request = req.query || {}
+
+        return UserBs.query(q => {
+            if (request.year)
+                q.where("year", request.year)
+            if (request.grupa)
+                q.where("grupa", "like", `%${request.grupa}%`)
+            if (request.departament)
+                q.where("departament", "like", `%${request.departament}%`)
+            if (request.name)
+                q.where("name", "like", `%${request.name}%`)
+
+            //cauta doar userii ce necesita cazare
+            if (request.start_date && request.end_date) {
+                q.whereNotExists(
+                    knex('bookings').whereRaw('??.?? = ??.?? and ?? < ? and ?? > ?', [
+                        "bookings",
+                        "user_id",
+                        "users",
+                        "id",
+                        "start_date",
+                        new Date(request.end_date),
+                        "end_date",
+                        new Date(request.start_date)
+                    ])
+                )
+            }
+        })
+            .fetchAll()
+            .then(r => {
+                let data = r ? r.serialize() : []
+                return resp.json({
+                    status: true,
+                    data: data
+                })
+            })
+            .catch(e => {
+                console.log('getBlocksRooms error', e)
+                return resp.json({
+                    status: false
                 })
             })
     }
@@ -601,6 +677,89 @@ class HomeController {
             .then(r => {
                 return resp.json({
                     status: true,
+                })
+            })
+    }
+
+    async createAutoBooking(req, resp, next) {
+        let request = req.body
+
+        console.log('request.userIds', request.userIds)
+
+        let data = []
+
+        let userIds = request.userIds || []
+
+        let rooms = await RoomBs.query(q => {
+
+            q.where("type", "<>", "rezervat")
+
+            //camerele ce nu au rezervari pentru perioada aleasa
+            q.whereNotExists(
+                knex('bookings').whereRaw('??.?? = ??.?? and ?? < ? and ?? > ?', [
+                    "bookings",
+                    "room_id",
+                    "rooms",
+                    "id",
+                    "start_date",
+                    new Date(request.end_date),
+                    "end_date",
+                    new Date(request.start_date)
+                ])
+            )
+        })
+            .fetchAll()
+            .then(r => r ? r.serialize() : [])
+
+        console.log('rooms', rooms)
+
+        if (!rooms || !rooms.length) {
+            console.log('Error: not found rooms for booking')
+            return resp.json({
+                status: false,
+            })
+        }
+
+        let roomIndex = 0;
+        let roomCapacity = rooms[roomIndex].capacity
+
+        data = userIds.map(userId => {
+
+            if (roomCapacity < 1) {
+                if (roomIndex + 1 < rooms.length) {
+                    roomIndex = roomIndex + 1
+                    roomCapacity = rooms[roomIndex].capacity
+                } else {
+                    return null
+                }
+            }
+
+            let roomId = rooms[roomIndex].id
+            roomCapacity = roomCapacity - 1
+
+
+            return {
+                room_id: roomId,
+                user_id: userId,
+                start_date: request.start_date || "",
+                end_date: request.end_date || "",
+                type: 'auto'
+            }
+        })
+
+        console.log('data to insert', data)
+
+        knex("bookings")
+            .insert(data)
+            .then(r => {
+                return resp.json({
+                    status: true,
+                })
+            })
+            .catch(er => {
+                console.log("createAutoBooking", er)
+                return resp.json({
+                    status: false,
                 })
             })
     }

@@ -190,7 +190,7 @@ function RezervariList() {
                                                 }}
                                             >
                                                 {rooms && rooms.map && rooms.map((item, key) => (
-                                                    <option value={item.id}>{`${item.nr} ${item.camera}`}</option>
+                                                    <option value={item.id}>{`${item.nr} ${item.camera || ""}`}</option>
                                                 ))}
                                             </select>
                                         </td>

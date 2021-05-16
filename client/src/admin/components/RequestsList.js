@@ -150,19 +150,20 @@ function RequestsList() {
                                 return (
                                     <tr>
                                         <th scope="row"></th>
-                                        <td>
-                                            <select
-                                                value={item.room_from_id || ""}
-                                                onChange={event => {
-                                                    items[key].room_from_id = event.target.value
-                                                    setItems([...items])
-                                                }}
-                                            >
-                                                {rooms && rooms.map && rooms.map((item, key) => (
-                                                    <option value={item.id}>{`${item.nr} ${item.camera}`}</option>
-                                                ))}
-                                            </select>
-                                        </td>
+                                        <td>{item.room_from && item.room_from.nr} {item.room_from && item.room_from.camera || ""}</td>
+                                        {/*<td>*/}
+                                        {/*    <select*/}
+                                        {/*        value={item.room_from_id || ""}*/}
+                                        {/*        onChange={event => {*/}
+                                        {/*            items[key].room_from_id = event.target.value*/}
+                                        {/*            setItems([...items])*/}
+                                        {/*        }}*/}
+                                        {/*    >*/}
+                                        {/*        {rooms && rooms.map && rooms.map((item, key) => (*/}
+                                        {/*            <option value={item.id}>{`${item.nr} ${item.camera}`}</option>*/}
+                                        {/*        ))}*/}
+                                        {/*    </select>*/}
+                                        {/*</td>*/}
                                         <td>
                                             <select
                                                 value={item.room_to_id || ""}
@@ -172,55 +173,24 @@ function RequestsList() {
                                                 }}
                                             >
                                                 {rooms && rooms.map && rooms.map((item, key) => (
-                                                    <option value={item.id}>{`${item.nr} ${item.camera}`}</option>
+                                                    <option value={item.id}>{`${item.nr} ${item.camera || ""}`}</option>
                                                 ))}
                                             </select>
                                         </td>
 
                                         <td>{item.user.email}</td>
-                                        <td>{new Date(item.start_date).toLocaleDateString()|| ""}</td>
-                                        <td>{new Date(item.end_date).toLocaleDateString() || ""}</td>
-                                        {/*<td>*/}
-                                        {/*    <input*/}
-                                        {/*        type="number" min={1} max={9} value={item.room.capacity || ""}*/}
-                                        {/*        onChange={event => {*/}
-                                        {/*            items[key].capacity = event.target.value*/}
-                                        {/*            setItems([...items])*/}
-                                        {/*        }}*/}
-                                        {/*    />*/}
-                                        {/*</td>*/}
-                                        {/*<td>*/}
-                                        {/*    <select*/}
-                                        {/*        value={item.block_id || ""}*/}
-                                        {/*        onChange={event => {*/}
-                                        {/*            items[key].block_id = event.target.value*/}
-                                        {/*            setItems([...items])*/}
-                                        {/*        }}*/}
-                                        {/*    >*/}
-                                        {/*        <option value={''} disabled/>*/}
-                                        {/*        {blocks && blocks.map && blocks.map((item, key) => (*/}
-                                        {/*            <option value={item.id}>{item.nr}</option>*/}
-                                        {/*        ))}*/}
-                                        {/*    </select>*/}
-                                        {/*</td>*/}
-                                        {/*<td>*/}
-                                        {/*    <input*/}
-                                        {/*        type="number" min={0} max={99} value={item.etaj || ""}*/}
-                                        {/*        onChange={event => {*/}
-                                        {/*            items[key].etaj = event.target.value*/}
-                                        {/*            setItems([...items])*/}
-                                        {/*        }}*/}
-                                        {/*    />*/}
-                                        {/*</td>*/}
-                                        {/*<td>*/}
-                                        {/*    <input*/}
-                                        {/*        type={"text"} value={item.type || ""}*/}
-                                        {/*        onChange={event => {*/}
-                                        {/*            items[key].type = event.target.value*/}
-                                        {/*            setItems([...items])*/}
-                                        {/*        }}*/}
-                                        {/*    />*/}
-                                        {/*</td>*/}
+                                        <td>
+                                            <input
+                                                type={"text"} value={item.status || "draft"}
+                                                onChange={event => {
+                                                    items[key].status = event.target.value
+                                                    setItems([...items])
+                                                }}
+                                            />
+                                            {/*{item.status || "draft"}*/}
+                                        </td>
+
+
                                         <td>
                                             <button
                                                 type="button" className="btn btn-outline-primary"

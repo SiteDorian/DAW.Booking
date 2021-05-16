@@ -13,4 +13,16 @@
       vertical-align: middle;
     }
   }
+
+  .big-spinner {
+    width: 240px;
+    height: 240px;
+    border-width: 0.3rem;
+    //border: 0.25em solid currentColor;
+  }
+  .small-spinner {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.15rem;
+  }
 }

@@ -54,7 +54,7 @@ function Login({history}) {
                             onChange={event => setUsername(event.target.value)}
                         />
                         <input
-                            type="text"
+                            type="password"
                             id="password" className="fadeIn third" name="login"
                             placeholder="password"
                             value={password}

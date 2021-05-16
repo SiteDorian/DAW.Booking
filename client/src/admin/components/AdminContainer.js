@@ -10,6 +10,7 @@ import UsersList from "./UsersList";
 import StudentsList from "./StudentsList";
 import Login from "./login";
 import axios from 'axios';
+import Automatizare from "./Automatizare";
 
 axios.interceptors.request.use(
     config => {
@@ -62,6 +63,9 @@ function AdminContainer({history}) {
                     />
                     <Route
                         path={`${prefix}/students`} component={StudentsList}
+                    />
+                    <Route
+                        path={`${prefix}/automatizare`} component={Automatizare}
                     />
                 </Switch>
             </div>

@@ -6,13 +6,18 @@ import {FaEdit, FaTrashAlt, FaEye, FaCheck} from 'react-icons/fa'
 function UsersList() {
     const [items, setItems] = useState([])
     const [newItem, setNewItem] = useState({})
+    const [filter, setFilter] = useState({})
 
     useEffect(() => {
         fetchData()
     }, [])
 
     function fetchData() {
-        axios.get(`${process.env.REACT_APP_API_HOST}/users`)
+        axios.get(`${process.env.REACT_APP_API_HOST}/users`, {
+            params: {
+                ...filter
+            }
+        })
             .then(data => {
                 let resp = data.data || {}
                 if (resp.status)
@@ -55,6 +60,97 @@ function UsersList() {
                 <div className={"col-12"}>
                     <h1>Lista de studenti</h1>
                 </div>
+
+                <div className={"col-12 py-2"}>
+                    <div className={"col-12 border p-2"}>
+                        <div className={"row align-items-end"}>
+                            <div className={"col-12"}>
+                                <h5>Filter</h5>
+                            </div>
+
+                            <div className="col-3 ">
+                                <label htmlFor="exampleFormControlInput1" className="form-label">Nume</label>
+                                <input
+                                    type="text" className="form-control" id="exampleFormControlInput1"
+                                    placeholder="User name"
+                                    value={filter.name || ""}
+                                    onChange={event => setFilter({...filter, name: event.target.value || ''})}
+                                />
+                            </div>
+
+                            <div className="col-3 ">
+                                <label htmlFor="exampleFormControlInput2" className="form-label">Email</label>
+                                <input
+                                    type="text" className="form-control" id="exampleFormControlInput2"
+                                    placeholder="User email"
+                                    value={filter.email || ""}
+                                    onChange={event => setFilter({...filter, email: event.target.value || ''})}
+                                />
+                            </div>
+
+                            <div className="col-2 ">
+                                <label htmlFor="exampleFormControlInput2" className="form-label">Tip</label>
+                                <input
+                                    type="text" className="form-control" id="exampleFormControlInput2"
+                                    placeholder="Tipul"
+                                    value={filter.type || ""}
+                                    onChange={event => setFilter({...filter, type: event.target.value || ''})}
+                                />
+                            </div>
+
+                            <div className="col-2 ">
+                                <label htmlFor="exampleFormControlInput2" className="form-label">Grupa</label>
+                                <input
+                                    type="text" className="form-control" id="exampleFormControlInput2"
+                                    placeholder="Grupa"
+                                    value={filter.grupa || ""}
+                                    onChange={event => setFilter({...filter, grupa: event.target.value || ''})}
+                                />
+                            </div>
+
+                            <div className="col-1 mt-3">
+                                <label htmlFor="exampleFormControlInput2" className="form-label">Necesita&nbsp;cazare</label>
+                                <input
+                                    type="checkbox" className="form-control" id="exampleFormControlInput2"
+                                    checked={filter.necesita_cazare || ""}
+                                    onChange={event => setFilter({...filter, necesita_cazare: !filter.necesita_cazare || ''})}
+                                />
+                            </div>
+
+                            <div className="col-3 mt-3">
+                                <label htmlFor="exampleFormControlInput2" className="form-label">Departament</label>
+                                <input
+                                    type="text" className="form-control" id="exampleFormControlInput2"
+                                    placeholder="Departament"
+                                    value={filter.departament || ""}
+                                    onChange={event => setFilter({...filter, departament: event.target.value || ''})}
+                                />
+                            </div>
+
+                            <div className="col-2 mt-3">
+                                <label htmlFor="exampleFormControlInput7" className="form-label">Anul</label>
+                                <input
+                                    type="number" className="form-control" id="exampleFormControlInput7"
+                                    min={1}
+                                    max={5}
+                                    value={filter.year || ""}
+                                    onChange={event => setFilter({...filter, year: event.target.value || ''})}
+                                />
+                            </div>
+
+
+                            <div className="col ">
+                                <button
+                                    type="button" className="btn btn-primary d-flex ml-auto mr-2 mt-3"
+                                    onClick={() => fetchData()}
+                                >
+                                    Search
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div className={"col-12 mt-4"} style={{paddingBottom: '150px'}}>
                     <table className={"table table-bordered"}>
                         <thead>
@@ -80,9 +176,9 @@ function UsersList() {
                                         <th scope="row"></th>
                                         <td>
                                             <input
-                                                type={"text"} value={item.nume || ""}
+                                                type={"text"} value={item.name || ""}
                                                 onChange={event => {
-                                                    items[key].nume = event.target.value
+                                                    items[key].name = event.target.value
                                                     setItems([...items])
                                                 }}
                                             />
@@ -135,17 +231,19 @@ function UsersList() {
                                             />
                                         </td>
 
-                                        <select
-                                            value={item.necesita_cazare || ""}
-                                            onChange={event => {
-                                                items[key].necesita_cazare = event.target.value
-                                                setItems([...items])
-                                            }}
-                                        >
-                                            <option disabled={true}/>
-                                            <option value={true}>Da</option>
-                                            <option value={false}>Nu</option>
-                                        </select>
+                                        <td>
+                                            <select
+                                                value={item.necesita_cazare || ""}
+                                                onChange={event => {
+                                                    items[key].necesita_cazare = event.target.value
+                                                    setItems([...items])
+                                                }}
+                                            >
+                                                <option disabled={true}/>
+                                                <option value={true}>Da</option>
+                                                <option value={false}>Nu</option>
+                                            </select>
+                                        </td>
 
                                         <td>
                                             <button
